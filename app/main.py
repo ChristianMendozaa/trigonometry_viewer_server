@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.auth import router as auth_router
 from app.api.series import router as series_router
 from app.api.results import router as results_router
+from app.api.custom_function import router as customF_router
 
 app = FastAPI()
 
@@ -12,7 +13,7 @@ initialize_firebase()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://trigonometry-viewer.vercel.app"],  # Dominio frontend
+    allow_origins=["https://trigonometry-viewer.vercel.app", "http://localhost:3000"],  # Dominio frontend
     allow_credentials=True,
     allow_methods=["*"],  # Permitir todos los métodos (GET, POST, etc.)
     allow_headers=["*"],  # Permitir todos los headers
@@ -22,7 +23,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(series_router)
 app.include_router(results_router)
-
+app.include_router(customF_router)
 
 @app.get("/")
 def read_root():
