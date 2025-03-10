@@ -12,10 +12,10 @@ initialize_firebase()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://trigonometry-viewer.vercel.app"],  # Dominio frontend
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Permitir todos los métodos (GET, POST, etc.)
+    allow_headers=["*"],  # Permitir todos los headers
 )
 
 # Incluir los routers de autenticación y series trigonométricas
