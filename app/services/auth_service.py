@@ -10,19 +10,39 @@ class AuthService:
     def verify_token(token: str) -> User:
         """
         Verifica el token JWT de Firebase y devuelve los datos del usuario autenticado.
+        Obteniendo el rol desde la colección "users" en Firestore.
         """
         try:
+            # Verifica el token en Firebase
             decoded_token = firebase_auth.verify_id_token(token)
-            user_record: UserRecord = firebase_auth.get_user(decoded_token['uid'])
+            uid = decoded_token["uid"]
 
-            role = user_record.custom_claims.get("role", "user")  # Obtener rol (si existe)
+            # Obtiene información básica del usuario desde Firebase Authentication
+            user_record: UserRecord = firebase_auth.get_user(uid)
 
+            # 🔥 Obtiene el documento del usuario en la colección "users"
+            doc_ref = db.collection("users").document(uid).get()
+            
+            if not doc_ref.exists:
+                # Si no existe el documento en Firestore, 
+                # se puede usar un rol por defecto o lanzar error según tus necesidades
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="No se encontró información de usuario en Firestore."
+                )
+
+            # Convertimos el documento a dict para extraer la info
+            user_data = doc_ref.to_dict()
+            role = user_data.get("role", "user")
+
+            # Retornamos un objeto de tipo User
             return User(
                 id=user_record.uid,
                 name=user_record.display_name or "Unknown",
                 email=user_record.email,
                 role=UserRole(role)
             )
+
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,6 +61,8 @@ class AuthService:
                 password=password,
                 display_name=name
             )
+            
+            # Opcional: si no usarás el custom_claim para nada, puedes omitirlo
             firebase_auth.set_custom_user_claims(user_record.uid, {"role": role})
 
             # 🔥 Guardar en Firestore en la colección "users"
