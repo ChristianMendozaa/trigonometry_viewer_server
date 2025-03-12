@@ -27,7 +27,7 @@ async def save_function(request: CustomFunctionRequest, authorization: str = Hea
             "expression": request.expression,
             "date": datetime.utcnow().isoformat(),
         }
-        print(function_data)
+
         # 🔥 Guardar la función personalizada en Firestore
         doc_ref = db.collection("custom_functions").add(function_data)
         function_id = doc_ref[1].id
